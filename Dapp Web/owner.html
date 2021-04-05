@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Reset Smart Contract</title>
+</head>
+
+<body>
+    <!--標題-->
+    <nav class="navbar navbar-dark bg-dark">
+        <span class="navbar-brand mb-0 h1">智能合約資訊</span>
+    </nav>
+
+    <!--輸入的表格-->
+    <form class="col-sm-10">
+        <div class="form-group row"></div>
+        <div class="form-group row">
+            <label for="contractAddress" class="col-sm-2 col-form-label">合約地址</label>
+            <div class="col-sm-3">
+                <input type="conAddress" class="form-control" id="contractAddress" placeholder="">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="buyerAddress" class="col-sm-2 col-form-label">買家地址</label>
+            <div class="col-sm-3">
+                <input type="buyerAddress" class="form-control" id="buyerAddress" placeholder="">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="selleradd" class="col-sm-2 col-form-label">賣家地址</label>
+            <div class="col-sm-3">
+                <input type="price" class="form-control" id="selleradd" placeholder="">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="carrierAddress" class="col-sm-2 col-form-label">貨運商地址</label>
+            <div class="col-sm-3">
+                <input type="carrAddress" class="form-control" id="carrierAddress" placeholder="">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="owneradd" class="col-sm-2 col-form-label">擁有者地址</label>
+            <div class="col-sm-3">
+                <input type="carrfee" class="form-control" id="owneradd" placeholder="">
+            </div>
+
+        </div>
+                <div class="form-group row">
+            <label for="compadd" class="col-sm-2 col-form-label">公司地址</label>
+            <div class="col-sm-3">
+                <input type="carrfee" class="form-control" id="compadd" placeholder="">
+            </div>
+
+        </div>
+
+        <div class="text-center">
+                <button type="confirmButton" onclick="getvalue();" class="btn btn-primary">確定</button>
+        </div> 
+    </form>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"
+        src0="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"
+        src1="http://code.dappbench.com/browser-solc.min.js" type="text/javascript"
+        src2="https://requirejs.org/docs/release/2.3.5/minified/require.js"
+    >
+    </script>
+<script>
+    function getvalue(){
+    if (typeof web3 !== 'undefined') {
+     web3 = new Web3(web3.currentProvider);
+    }
+    var from = web3.eth.accounts[0];
+    var conadd=$("#contractAddress").val();;
+    abi=[{"constant":true,"inputs":[],"name":"seller","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"carrier1","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"company","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"buyer","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"carrier1Fee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_buyer","type":"address"},{"name":"_carrier1","type":"address"},{"name":"_carrier1Fee","type":"uint256"},{"name":"_purchasePrice","type":"uint256"}],"name":"reset","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"purchasePrice","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_buyer","type":"address"},{"name":"_carrier1","type":"address"},{"name":"_carrier1Fee","type":"uint256"},{"name":"_purchasePrice","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"}];
+    var MyContract = web3.eth.contract(abi);
+    var myContractInstance = MyContract.at(conadd);
+}
+
+$(document).ready(function(){
+if (typeof web3 !== 'undefined') {
+     web3 = new Web3(web3.currentProvider);
+    }
+    var from = web3.eth.accounts[0];
+    var conadd="0x05760bf6EB884B45a12f127Bc25A387A8F997D3d";
+    abi=[{"constant":true,"inputs":[],"name":"seller","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"carrier1","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"company","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"buyer","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"carrier1Fee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_buyer","type":"address"},{"name":"_carrier1","type":"address"},{"name":"_carrier1Fee","type":"uint256"},{"name":"_purchasePrice","type":"uint256"}],"name":"reset","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"purchasePrice","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_buyer","type":"address"},{"name":"_carrier1","type":"address"},{"name":"_carrier1Fee","type":"uint256"},{"name":"_purchasePrice","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"}];
+    var MyContract = web3.eth.contract(abi);
+    var myContractInstance = MyContract.at(conadd);
+    myContractInstance.buyer(function(error,result){
+    $("#buyerAddress").val(result);
+    });
+   myContractInstance.owner(function(error,result){
+    $("#owneradd").val(result);
+    });
+   myContractInstance.company(function(error,result){
+    $("#compadd").val(result);
+    });
+   myContractInstance.seller(function(error,result){
+    $("#selleradd").val(result);
+    });
+    myContractInstance.carrier1(function(error,result){
+    $("#carrierAddress").val(result);
+    });
+});
+
+</script>
+</body>
+
+</html>

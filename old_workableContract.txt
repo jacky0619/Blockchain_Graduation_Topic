@@ -1,0 +1,418 @@
+pragma solidity >=0.4.22 <0.6.0;
+contract TradeHandler {
+    address payable public seller;
+    address payable public carrier;
+    address payable public buyer;
+    address public owner;
+    address public company;
+    address public manufacture;
+    uint public purchasePrice;
+    uint public carrierFee;
+    
+    uint public Num;//存賣家選擇的買家號碼
+    
+    int public Sellerpurchaseway;//0:只可面交 1:只可貨運 2:貨運面交皆可
+    bool public flag=false;//true:可被購買 false:不可購買
+    
+    uint public nowtime;//暫存現在時間
+    bool public result=false;
+    bool public manufacturecheck=false;//紀錄製造商確認與否
+    
+    enum WaitingFor {          //一般化交易流程 
+        OwnerCreate,           //擁有者創建完成
+        BuyerEscrowPayment,    //買家已付款
+        SellerRelease,         //賣家已出貨
+        CarrierReceive,        //貨運已拿貨
+        CarrierArrive,         //貨運已到貨
+        BuyerGet,              //買家已拿貨
+        BuyerAccept,           //買家已確認
+        Completed              //完成
+    }
+    WaitingFor public state;
+    
+    
+    enum ReturnProcess {  //退貨的狀態流程
+        BuyerInitiate,    //買家發起
+        SellerConfirm,    //賣家是否同意
+        BuyerRelease,     //買家出貨
+        CarrierAccept,    //貨運拿貨
+        CarrierRelease,   //貨運到貨
+        SellerGet,        //賣家拿貨
+        SellerAccept,     //賣家確認
+        Completed         //完成
+    }
+    ReturnProcess public returnprocess;
+
+
+    enum OwnerShip { //判別現在擁有者是否交出擁有權
+        isowner,
+        iscontract
+    }
+    OwnerShip public ownership;
+  
+    
+   
+    //************************************公司創建及全額付款購買********************************************
+    constructor (address _manufacture) public 
+    {
+        seller =msg.sender;
+        owner =msg.sender;
+        company = msg.sender;
+        manufacture=_manufacture;
+        nowtime =now;
+    }
+    
+    function ManufactureCheck(bool  _manufacturecheck)
+    onlyManufacture
+    public
+    {
+        manufacturecheck= _manufacturecheck;
+
+    }
+    
+    function OwnerCreate( address _buyer, address _carrier, uint _carrierFee, uint _purchasePrice)
+    public payable
+    onlyOwner
+    condition(manufacturecheck)
+    OwnerShipCheck(OwnerShip.isowner)
+     {  
+        purchasePrice=_purchasePrice;
+        seller = msg.sender;
+        owner = msg.sender;
+        buyer  = address(uint160(address(_buyer)));
+        carrier =address(uint160(address(_carrier)));
+        carrierFee=_carrierFee;
+        state=WaitingFor.OwnerCreate;
+        nowtime=now;//創建完後把當下時間存在nowtime中
+        ownership=OwnerShip.iscontract;//選擇完買家及交出擁有權
+     }
+     
+     
+    function BuyerPay() //等待買家付款
+    public 
+    inState(WaitingFor.OwnerCreate)
+    pricecondition(msg.value == (  purchasePrice  + carrierFee))
+    onlyBuyer
+    payable{
+        state = WaitingFor.BuyerEscrowPayment;
+        nowtime=now;
+      
+    }
+    
+    
+      //**************************************修飾函數********************************************
+    modifier pricecondition(bool _condition) {
+        require(_condition,"price is wrong.");
+        
+        _;
+    }
+    modifier condition(bool _condition) {
+        require(_condition,"bool is wrong.");
+        
+        _;
+    }
+    modifier onlySeller() {
+        require(
+            msg.sender == seller,
+            "Only seller can call this."
+        );
+        _;
+    }
+    modifier onlyBuyer() {
+        require(
+            msg.sender == buyer,
+            "Only buyer can call this."
+        );
+        _;
+    }
+      modifier onlyOwner() {
+        require(
+            msg.sender == owner,
+            "Only owner can call this."
+        );
+        _;
+    }
+     modifier onlycarrier() {
+        require(
+            msg.sender == carrier,
+            "Only carrier can call this."
+        );
+        _;
+    }
+    modifier onlyManufacture() {
+        require(
+            msg.sender == manufacture,
+            "Only manufacture can call this."
+        );
+        _;
+    }
+    modifier inState(WaitingFor _state){  //檢查state是否符合
+        require(
+            state == _state,
+            "Invalid state."
+        );
+        _;
+    }
+    modifier OwnerShipCheck(OwnerShip _ownership){  //檢查擁有權是否被扣留
+        require(
+            ownership == _ownership,
+            "Contract is the owner."
+        );
+        _;
+    }
+     modifier ReturnProcessCheck(ReturnProcess _returnprocess){  //檢查退貨的流程
+        require(
+            returnprocess == _returnprocess,
+            "Invalid returnprocess."
+        );
+        _;
+    }
+
+    
+    
+    function getResult() public view returns (bool){ //拿到買賣家按正確與否
+          return (result);
+      }
+
+   
+    //****************************時間的判斷及function***************************
+    modifier onlyAfter( uint  _time){ //現在的時間超過設定(預期)時間才可呼叫
+          require(
+          now > _time,"time is not yet"); _; }
+      
+    function BuyerOverPay()//買家超過時間未付款時賣家可呼叫
+    public 
+    inState(WaitingFor.OwnerCreate)
+    onlyAfter(nowtime + 5 minutes)
+    onlySeller
+    {
+        seller.transfer(purchasePrice * 1/10);
+        state=WaitingFor.Completed;
+    }
+    
+      
+    /*function SellererOverPay()//賣家超過時間未付款時買家可呼叫
+    public 
+    inState(WaitingFor.BuyerEscrowPayment)
+    onlyAfter(nowtime + 5 minutes)
+    onlyBuyer
+    {
+        buyer.transfer(purchasePrice * 1/10);
+        owner=buyer;
+        state=WaitingFor.Completed;
+    }*/
+    
+    function SellererOverRelease()//賣家超過時間未出貨時買家可呼叫
+    public 
+    inState(WaitingFor.BuyerEscrowPayment)
+    onlyAfter(nowtime + 5 minutes)
+    onlyBuyer
+    {
+        buyer.transfer(purchasePrice * 1/10);
+        owner=buyer;
+        state=WaitingFor.Completed;
+    }
+    
+    function BuyerOverGet()//買家超過時間未拿貨時賣家可呼叫
+    public 
+    inState(WaitingFor.BuyerEscrowPayment)
+    onlyAfter(nowtime + 5 minutes)
+    onlySeller
+    {
+        seller.transfer(purchasePrice * 1/10);
+        carrier.transfer(carrierFee);
+        state=WaitingFor.Completed;
+    }
+    
+    function BuyerOverAccept()//買家超過時間未確認商品時賣家可呼叫
+    public 
+    inState(WaitingFor.BuyerGet)
+    onlyAfter(nowtime + 5 minutes)
+    onlySeller
+    {
+        seller.transfer(purchasePrice);
+        carrier.transfer(carrierFee);
+        state=WaitingFor.Completed;
+    } 
+    
+    
+    
+     //****************************賣家開放讓商品可購買及買家會押金購買function**************************
+    struct requester {
+        int   Buyerpurchaseway; // 0:面交 1:貨運 
+        address payable requesterID;
+    }
+    mapping  (uint => requester) public requesters;
+    uint public numrequester=0;
+    
+    
+    function Sell(uint _purchasePrice,int _sellerpurchaseway)
+    onlyOwner
+    public
+    {
+        purchasePrice=_purchasePrice;
+        Sellerpurchaseway=_sellerpurchaseway;
+        flag=true;
+
+    }
+    
+    function Buy(int _buyerpurchaseway)
+    public
+    pricecondition(msg.value == (  purchasePrice * 1/10 ))
+    condition(flag)
+    payable
+    
+    { 
+        
+        
+        requesters[numrequester].Buyerpurchaseway=_buyerpurchaseway;
+        requesters[numrequester].requesterID=msg.sender;
+        
+        if(Sellerpurchaseway<2)
+            if(Sellerpurchaseway!=requesters[numrequester].Buyerpurchaseway)
+                revert();
+            
+        numrequester++;
+        numrequester=0;//下次呼叫時數量初始
+    }
+    
+    
+    function chooseBuyer(uint _num ,address _carrier,uint _carrierFee) public  //賣家選擇一個買家 之後交出擁有權
+    onlyOwner
+    {     
+         Num=_num;
+         buyer=requesters[Num].requesterID ;
+           
+         for(uint i=0;i<numrequester;i++)
+         {
+             if(i!=Num)
+                 requesters[i].requesterID.transfer(purchasePrice * 1/10);
+            
+             delete(requesters[i]);//選完即刪除所有買家資料     
+         }
+        
+         flag =false;
+         ownership=OwnerShip.iscontract;//選擇完買家及交出擁有權
+         seller = msg.sender;
+         owner = msg.sender;
+         carrier =address(uint160(address(_carrier)));
+         carrierFee=_carrierFee;
+         state=WaitingFor.OwnerCreate;
+         nowtime=now;//創建完後把當下時間存在nowtime中
+    }
+    
+     //***********************押金付款購買流程****************************
+     
+    function WaitingBuyerPay() //等待買家付款
+    public 
+    inState(WaitingFor.OwnerCreate)
+    pricecondition(msg.value == (  purchasePrice * 9/10 + carrierFee))
+    onlyBuyer
+    payable{
+        state = WaitingFor.BuyerEscrowPayment;
+        nowtime=now;
+    }
+    
+
+    
+    function WaitingSellerRelease (bool _result)//等待賣家出貨
+    public
+    onlySeller
+    inState(WaitingFor.BuyerEscrowPayment)
+    {
+        result =_result;
+        if(result == true)
+        state=WaitingFor.SellerRelease;
+        else
+        state=WaitingFor.BuyerEscrowPayment;
+       
+        nowtime=now;
+    }
+    
+    function WaitingCarrierReceive (bool _result)//等待貨運收貨
+    public
+    onlycarrier
+    inState(WaitingFor.SellerRelease){
+        
+        result=_result;
+        if(result == true)
+        state=WaitingFor.CarrierReceive;
+        else
+        state=WaitingFor.SellerRelease;
+        
+        nowtime=now;
+    }
+    
+    function WaitingCarrierArrive (bool _result)//等待貨運到貨
+    public
+    onlycarrier
+    inState(WaitingFor.CarrierReceive){
+        
+        result=_result;
+        if(result == true)
+        state=WaitingFor.CarrierArrive;
+        else
+        state=WaitingFor.CarrierReceive;
+        
+        nowtime=now;
+    }
+    
+    function WaitingBuyerGet (bool _result)//等待買家拿貨
+    public
+    onlyBuyer
+    inState(WaitingFor.CarrierArrive){
+        
+        result=_result;
+        if(result == true)
+        state=WaitingFor.BuyerGet;
+        else
+        state=WaitingFor.CarrierArrive;
+    }
+     function WaitingBuyerAccept (bool _result)//等待買家確認
+    public
+    onlyBuyer
+    inState(WaitingFor.BuyerGet){
+        
+        result=_result;
+        if(result==true)
+        state=WaitingFor.BuyerAccept;
+        else
+        state=WaitingFor.BuyerGet;
+        
+        nowtime=now;
+        
+        completed();
+        reset();
+    
+    }
+    
+    function completed()//等待交易完成
+    public
+    inState(WaitingFor.BuyerAccept){
+        
+            carrier.transfer(carrierFee);
+            seller.transfer(purchasePrice);
+            owner = buyer;
+            state=WaitingFor.Completed;
+        
+    }
+    
+   
+    
+    
+    
+    
+    function reset() public {
+        if(state!=WaitingFor.Completed||msg.sender!=owner){
+            revert();
+        }
+        seller = msg.sender;
+        buyer =address(uint160(address(0)));
+        carrier =address(uint160(address(0)));
+        carrierFee = 0;
+        purchasePrice =0;
+        state = WaitingFor.OwnerCreate;
+        }   
+        
+
+}

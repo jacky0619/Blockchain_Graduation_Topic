@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Set Smart Contract</title>
+</head>
+
+<body>
+    <!--標題-->
+    <nav class="navbar navbar-dark bg-dark">
+        <span class="navbar-brand mb-0 h1">智能合約建立</span>
+    </nav>
+
+    <!--輸入的表格-->
+    <form class="col-sm-10">
+        <div class="form-group row"></div>
+        <div class="form-group row">
+            <label for="buyerAddress" class="col-sm-2 col-form-label">買家 address</label>
+            <div class="col-sm-3">
+                <input type="buyerAddress" class="form-control" id="buyerAddress" placeholder="">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="inputPrice" class="col-sm-2 col-form-label">貨品價格</label>
+            <div class="col-sm-3">
+                <input type="price" class="form-control" id="inputPrice" placeholder="Eth">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="carrierAddress" class="col-sm-2 col-form-label">貨運商 address</label>
+            <div class="col-sm-3">
+                <input type="carrAddress" class="form-control" id="carrierAddress" placeholder="">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="carrfee" class="col-sm-2 col-form-label">貨運費</label>
+            <div class="col-sm-3">
+                <input type="carrfee" class="form-control" id="carrfee" placeholder="Eth">
+            </div>
+
+        </div>
+
+        <div class="text-center">
+                <button type="confirmButton" onclick="getvalue();" class="btn btn-primary">確定</button>
+        </div> 
+    </form>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"
+        src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"
+        src="http://code.dappbench.com/browser-solc.min.js" type="text/javascript"
+        src="https://requirejs.org/docs/release/2.3.5/minified/require.js"
+    >
+    </script>
+<script>
+    function getvalue(){
+    var buyadd = $("#buyerAddress").val();
+    var inputPrice=$("#inputPrice").val();
+    var carrieradd=$("#carrierAddress").val();
+    var carrfee=$("#carrfee").val();
+    alert(buyadd);
+
+    if (typeof web3 !== 'undefined') {
+     web3 = new Web3(web3.currentProvider);
+    }
+
+    var _buyer = buyadd/* var of type address here */ ;
+var _carrier1 =  carrieradd/* var of type address here */ ;
+var _carrier1Fee = carrfee/* var of type uint256 here */ ;
+var _purchasePrice = inputPrice/* var of type uint256 here */ ;
+var tradehandlerContract = web3.eth.contract([{"constant":true,"inputs":[],"name":"seller","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"carrier1","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"buyer","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"carrier1Fee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_buyer","type":"address"},{"name":"_carrier1","type":"address"},{"name":"_carrier1Fee","type":"uint256"},{"name":"_purchasePrice","type":"uint256"}],"name":"reset","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"purchasePrice","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_buyer","type":"address"},{"name":"_carrier1","type":"address"},{"name":"_carrier1Fee","type":"uint256"},{"name":"_purchasePrice","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"}]);
+var tradehandler = tradehandlerContract.new(
+   _buyer,
+   _carrier1,
+   _carrier1Fee,
+   _purchasePrice,
+   {
+     from: web3.eth.accounts[0], 
+     data: '0x608060405234801561001057600080fd5b50604051608080610d358339810180604052608081101561003057600080fd5b8101908080519060200190929190805190602001909291908051906020019092919080519060200190929190505050336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555033600360006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555083600260006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555082600160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550816005819055508060048190555050505050610bb2806101836000396000f3fe60806040526004361061007d576000357c01000000000000000000000000000000000000000000000000000000009004806308551a531461072657806366905b191461077d5780637150d8ae146107d45780638da5cb5b1461082b578063a01290c114610882578063ce357d24146108ad578063defd6c5f14610932575b60068081111561008957fe5b600660009054906101000a900460ff1660068111156100a457fe5b14156100af57600080fd5b600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614801561013257506000600681111561011457fe5b600660009054906101000a900460ff16600681111561012f57fe5b14155b801561016457506005600681111561014657fe5b600660009054906101000a900460ff16600681111561016157fe5b14155b1561016e57600080fd5b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161480156101f05750600160068111156101d257fe5b600660009054906101000a900460ff1660068111156101ed57fe5b14155b801561022257506002600681111561020457fe5b600660009054906101000a900460ff16600681111561021f57fe5b14155b1561022c57600080fd5b600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161480156102af57506003600681111561029157fe5b600660009054906101000a900460ff1660068111156102ac57fe5b14155b80156102e15750600460068111156102c357fe5b600660009054906101000a900460ff1660068111156102de57fe5b14155b156102eb57600080fd5b600060068111156102f857fe5b600660009054906101000a900460ff16600681111561031357fe5b1480156103295750600554600454600202013414155b1561033357600080fd5b6001600681111561034057fe5b600660009054906101000a900460ff16600681111561035b57fe5b14801561036a57506004543414155b1561037457600080fd5b6000600681111561038157fe5b600660009054906101000a900460ff16600681111561039c57fe5b14156103cb576001600660006101000a81548160ff021916908360068111156103c157fe5b0217905550610724565b600160068111156103d857fe5b600660009054906101000a900460ff1660068111156103f357fe5b1415610422576002600660006101000a81548160ff0219169083600681111561041857fe5b0217905550610723565b6002600681111561042f57fe5b600660009054906101000a900460ff16600681111561044a57fe5b1415610479576003600660006101000a81548160ff0219169083600681111561046f57fe5b0217905550610722565b6003600681111561048657fe5b600660009054906101000a900460ff1660068111156104a157fe5b14156104d0576004600660006101000a81548160ff021916908360068111156104c657fe5b0217905550610721565b600460068111156104dd57fe5b600660009054906101000a900460ff1660068111156104f857fe5b1415610527576005600660006101000a81548160ff0219169083600681111561051d57fe5b0217905550610720565b6005600681111561053457fe5b600660009054906101000a900460ff16600681111561054f57fe5b141561071f5760068060006101000a81548160ff0219169083600681111561057357fe5b0217905550600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166108fc6005549081150290604051600060405180830381858888f193505050501580156105e2573d6000803e3d6000fd5b506000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166108fc6004546002029081150290604051600060405180830381858888f1935050505015801561064f573d6000803e3d6000fd5b50600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166108fc6004549081150290604051600060405180830381858888f193505050501580156106ba573d6000803e3d6000fd5b50600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16600360006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505b5b5b5b5b5b005b34801561073257600080fd5b5061073b61095d565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34801561078957600080fd5b50610792610982565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b3480156107e057600080fd5b506107e96109a8565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34801561083757600080fd5b506108406109ce565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34801561088e57600080fd5b506108976109f4565b6040518082815260200191505060405180910390f35b3480156108b957600080fd5b50610930600480360360808110156108d057600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190803590602001909291905050506109fa565b005b34801561093e57600080fd5b50610947610b80565b6040518082815260200191505060405180910390f35b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b600360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60055481565b600680811115610a0657fe5b600660009054906101000a900460ff166006811115610a2157fe5b141580610a7c5750600360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614155b15610a8657600080fd5b336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555083600260006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555082600160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555081600581905550806004819055506000600660006101000a81548160ff02191690836006811115610b7557fe5b021790555050505050565b6004548156fea165627a7a7230582009be3d05bad028f2549ae4faddd424f5731f0c4d0df813b2efab6ee668fb92c40029', 
+     gas: '4700000'
+   }, function (e, contract){
+    console.log(e, contract);
+    if (typeof contract.address !== 'undefined') {
+         console.log('Contract mined! address: ' + contract.address + ' transactionHash: ' + contract.transactionHash);
+    }
+ })
+}
+</script>
+</body>
+
+</html>
